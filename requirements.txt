@@ -1,0 +1,5 @@
+pydantic
+graphviz
+google-generativeai
+python-dotenv
+streamlit
