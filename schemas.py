@@ -20,7 +20,7 @@ class Relationship(BaseModel):
     entity3: Optional[str] = None  
     cardinality: str #1:N:M
     participation: List[str] = Field(default_factory=list)
-    attributes: List[Attribute] = Field(default_factory=list)
+    attributes: List[str] = Field(default_factory=list)
     identifyingRelationship: bool = False
     minCardinality: Optional[str] = None
     maxCardinality: Optional[str] = None
