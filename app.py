@@ -17,7 +17,21 @@ if st.button("Parse JSON"):
     try:
         erd_schema = parse_erd_json(json_input)
         st.write("Parsed ERD Schema:")
-        st.json(erd_schema.dict())
+        st.json(erd_schema.model_dump())
+        # erd_schema_json = erd_schema.entities
+        # print(erd_schema.entities)
+        # for entity in erd_schema.entities:
+        #     isWeak = 1
+        #     for attribute in entity.attributes:
+        #         if attribute.isPrimaryKey:
+        #             isWeak = 0;
+        #             break
+        #     if isWeak:
+                
+                
+        #         st.warning(f"\nEntity '{entity.name}' is a weak entity (no primary key found).\n")
+        #         entity.weak = True
+        # print(erd_schema.entities)    
     except ValidationError:
         st.error("Failed to parse the JSON.")
 
