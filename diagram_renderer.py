@@ -16,11 +16,17 @@ from parser import parse_erd_json
 # ni.render(directory='doctest-output', view=True)  
 def render_graph(graph, filename='graph', directory='doctest-output'):
     dot = graphviz.Digraph(filename, comment='Graph', format='png')
+    dot.attr(rankdir='LR')    
+    dot.attr(splines='polyline')
+    dot.attr(ranksep='1.8')
+    dot.attr(nodesep='0.4')
+    dot.attr('node', fontname='Times New Roman,', fontsize='12')
+    dot.attr('edge', fontname='Times New Roman,', fontsize='11')
     for entity in graph.entities:
         if entity.weak:
-            dot.node(entity.name, entity.name,shape='rectangle', peripheries='2')
+            dot.node(entity.name, entity.name,shape='rectangle', peripheries='2', style='filled', fillcolor='lightgrey')
         else:
-            dot.node(entity.name, entity.name, shape='rectangle')
+            dot.node(entity.name, entity.name, shape='rectangle', style='filled', fillcolor='lightgrey')  
         for attribute in entity.attributes:
             node_id = f"{entity.name}_{attribute.name}"
             if attribute.isPrimaryKey:
@@ -44,9 +50,9 @@ def render_graph(graph, filename='graph', directory='doctest-output'):
                     dot.edge(node_id, sub_node_id , arrowhead='none')
     for relationship in graph.relationships:
         if relationship.identifyingRelationship:
-            dot.node(relationship.name, relationship.name, shape='diamond', peripheries='2')
+            dot.node(relationship.name, relationship.name, shape='diamond', peripheries='2', style='filled', fillcolor='lightgrey')  
         else:
-            dot.node(relationship.name, relationship.name, shape='diamond')
+            dot.node(relationship.name, relationship.name, shape='diamond', style='filled', fillcolor='lightgrey') 
             
         if relationship.cardinality:
             cards = relationship.cardinality.split(':')
@@ -65,12 +71,10 @@ def render_graph(graph, filename='graph', directory='doctest-output'):
             c2 = f"{min_cards[1]}..{max_cards[1]}" if len(min_cards) > 1 and len(max_cards) > 1 else c2
             c3 = f"{min_cards[2]}..{max_cards[2]}" if len(min_cards) > 2 and len(max_cards) > 2 else c3
 
-        dot.edge(relationship.entity1, relationship.name, label=c1, arrowhead='none'    )
-        dot.edge(relationship.entity2, relationship.name, label=c2, arrowhead='none')
+        dot.edge(relationship.entity1, relationship.name, label=f' {c1} ', arrowhead='none', fontsize='12')
+        dot.edge(relationship.entity2, relationship.name, label=f' {c2} ', arrowhead='none', fontsize='12')
         if relationship.entity3:
-            dot.edge(relationship.entity3, relationship.name, label=c3, arrowhead='none')
-
-
+            dot.edge(relationship.entity3, relationship.name, label=f' {c3} ', arrowhead='none', fontsize='12')
     dot.render(directory=directory, view=True)
    
 if __name__ == "__main__":
