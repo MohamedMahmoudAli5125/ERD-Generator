@@ -55,17 +55,22 @@ def render_graph(graph, filename='graph', directory='doctest-output'):
         c1 = cards[0] if len(cards) > 0 else ""
         c2 = cards[1] if len(cards) > 1 else ""
         c3 = cards[2] if len(cards) > 2 else ""
+        for attribute in relationship.attributes:
+          dot.node(f"{relationship.name}_{attribute}", attribute, shape='ellipse')
+          dot.edge(relationship.name, f"{relationship.name}_{attribute}" , arrowhead='none')
         if relationship.minCardinality and relationship.maxCardinality:
-            c1 += f" ({relationship.minCardinality}, {relationship.maxCardinality})"
+            min_cards = relationship.minCardinality
+            max_cards = relationship.maxCardinality
+            c1 = f"{min_cards[0]}..{max_cards[0]}" if len(min_cards) > 0 and len(max_cards) > 0 else c1
+            c2 = f"{min_cards[1]}..{max_cards[1]}" if len(min_cards) > 1 and len(max_cards) > 1 else c2
+            c3 = f"{min_cards[2]}..{max_cards[2]}" if len(min_cards) > 2 and len(max_cards) > 2 else c3
 
         dot.edge(relationship.entity1, relationship.name, label=c1, arrowhead='none'    )
         dot.edge(relationship.entity2, relationship.name, label=c2, arrowhead='none')
         if relationship.entity3:
             dot.edge(relationship.entity3, relationship.name, label=c3, arrowhead='none')
 
-        for attribute in relationship.attributes:
-            dot.node(f"{relationship.name}_{attribute}", attribute, shape='ellipse')
-            dot.edge(relationship.name, f"{relationship.name}_{attribute}" , arrowhead='none')
+
     dot.render(directory=directory, view=True)
    
 if __name__ == "__main__":
@@ -129,8 +134,8 @@ if __name__ == "__main__":
       "entity2": "Project",
       "entity3": "Department",
       "cardinality": "M:N:1",
-      "minCardinality": "1",
-      "maxCardinality": "N",
+      "minCardinality": ["0", "1", "1"],
+      "maxCardinality": ["N", "N", "N"],
       "attributes": [
         "Hours"
       ]

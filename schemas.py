@@ -22,8 +22,8 @@ class Relationship(BaseModel):
     participation: List[str] = Field(default_factory=list)
     attributes: List[str] = Field(default_factory=list)
     identifyingRelationship: bool = False
-    minCardinality: Optional[str] = None
-    maxCardinality: Optional[str] = None
+    minCardinality: Optional[List[str]] = None # List of minimum cardinalities for each entity in the relationship
+    maxCardinality: Optional[List[str]] = None # List of maximum cardinalities for each entity in the relationship
     
 class ERDiagramSchema(BaseModel):
     entities: List[Entity] = Field(default_factory=list)
