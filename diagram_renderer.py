@@ -1,8 +1,11 @@
+import os
+
 import graphviz
 from parser import parse_erd_json
 
-def render_graph(graph, filename='graph', directory='doctest-output'):
-    dot = graphviz.Digraph(filename, comment='Graph', format='png')
+def render_graph(graph, filename='graph', directory='output', file_format='png'):
+    os.makedirs(directory, exist_ok=True)
+    dot = graphviz.Digraph(filename, comment='Graph', format=file_format)
     dot.attr(rankdir='LR' , splines='polyline', ranksep='1.8', nodesep='0.4')    
     dot.attr('node', fontname='Times New Roman,', fontsize='12')
     dot.attr('edge', fontname='Times New Roman,', fontsize='11')
@@ -13,7 +16,8 @@ def render_graph(graph, filename='graph', directory='doctest-output'):
     for relationship in graph.relationships:
         handle_relationship(dot, relationship)
             
-    dot.render(directory=directory, view=True)    
+    dot.render(directory=directory, view=False, cleanup=True)    
+    return dot
     
 def card_label(rel, i, default):
     mins = rel.minCardinality or []

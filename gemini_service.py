@@ -14,7 +14,7 @@ API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY not found in .env file.")
 client = genai.Client(api_key=API_KEY)
-
+GEMINI_MODEL_NAME = 'gemini-3.5-flash-lite'
 def generate_erd_json_from_text(system_description):  
     prompt = f"""
         You are an expert database designer and data modeler.
@@ -36,7 +36,7 @@ def generate_erd_json_from_text(system_description):
     
     try:
         response = client.models.generate_content(
-            model='gemini-3.5-flash-lite', # tried models 3.5 , 3.6 and 3.8 flash and all give me alot of 503 errors(high demand ), so I settled on 3.5 flash-lite which is the most stable one
+            model=GEMINI_MODEL_NAME, # tried models 3.5 , 3.6 and 3.8 flash and all give me alot of 503 errors(high demand ), so I settled on 3.5 flash-lite which is the most stable one
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
