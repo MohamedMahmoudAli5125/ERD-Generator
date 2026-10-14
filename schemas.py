@@ -18,7 +18,7 @@ class Relationship(BaseModel):
     entity1: str
     entity2: str
     entity3: Optional[str] = None  
-    cardinality: str #1:N:M
+    cardinality: List[str] = Field(default_factory=list) 
     participation: List[str] = Field(default_factory=list)
     attributes: List[str] = Field(default_factory=list)
     identifyingRelationship: bool = False
