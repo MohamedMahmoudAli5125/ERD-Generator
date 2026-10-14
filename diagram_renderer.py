@@ -26,9 +26,21 @@ def card_label(rel, i, default):
     mx = maxs[i] if i < len(maxs) else ""
     return f"{mn}..{mx}" if mn and mx else default
   
-def handle_attributes(dot, entity):
-    for attribute in entity.attributes:
-        node_id = f"{entity.name}_{attribute.name}"
+def handle_composite_attributes(dot, parent_node_id, composite_attributes):
+    for sub_attr in composite_attributes:
+        sub_attr_name = sub_attr.name if hasattr(sub_attr, 'name') else sub_attr
+        
+        sub_node_id = f"{parent_node_id}_{sub_attr_name}"
+        
+        dot.node(sub_node_id, sub_attr_name, shape='ellipse')
+        dot.edge(parent_node_id, sub_node_id, arrowhead='none')
+        
+        if hasattr(sub_attr, 'composite') and sub_attr.composite:
+            handle_composite_attributes(dot, sub_node_id, sub_attr.composite)
+
+def render_attributes(dot, owner_name, attributes):
+    for attribute in attributes:
+        node_id = f"{owner_name}_{attribute.name}"
         
         if attribute.isPrimaryKey:
             dot.node(node_id, f"<<u>{attribute.name}</u>>", shape='ellipse')   
@@ -42,62 +54,53 @@ def handle_attributes(dot, entity):
         else:
             dot.node(node_id, attribute.name, shape='ellipse')
             
-        dot.edge(entity.name, node_id, arrowhead='none')
+        dot.edge(owner_name, node_id, arrowhead='none')
         
         if attribute.composite:
-            for sub_attr in attribute.composite:
-                sub_node_id = f"{entity.name}_{sub_attr}"
-                dot.node(sub_node_id, sub_attr, shape='ellipse')
-                dot.edge(node_id, sub_node_id, arrowhead='none')
-                
+            handle_composite_attributes(dot, node_id, attribute.composite)
+            
 def handle_entity(dot, entity):
     if entity.weak:
         dot.node(entity.name, entity.name, shape='rectangle', peripheries='2', style='filled', fillcolor='lightgrey')
     else:
         dot.node(entity.name, entity.name, shape='rectangle', style='filled', fillcolor='lightgrey')  
-    handle_attributes(dot, entity)    
-                
+    render_attributes(dot, entity.name, entity.attributes)                
+
 def handle_relationship(dot, relationship):
     if relationship.identifyingRelationship:
         dot.node(relationship.name, relationship.name, shape='diamond', peripheries='2', style='filled', fillcolor='lightgrey')  
     else:
         dot.node(relationship.name, relationship.name, shape='diamond', style='filled', fillcolor='lightgrey') 
         
+    render_attributes(dot, relationship.name, relationship.attributes)
+    
     cards = relationship.cardinality
-    c1 = card_label(relationship, 0, cards[0] if len(cards) > 0 else "")
-    c2 = card_label(relationship, 1, cards[1] if len(cards) > 1 else "")
-    c3 = card_label(relationship, 2, cards[2] if len(cards) > 2 else "")
+    parts = relationship.participation
     
-    for attribute in relationship.attributes:
-        attr_node_id = f"{relationship.name}_{attribute}"
-        dot.node(attr_node_id, attribute, shape='ellipse')
-        dot.edge(relationship.name, attr_node_id, arrowhead='none')
-    
-    total1 = len(relationship.participation) > 0 and relationship.participation[0] == "total" 
-    edge_style1 = {'color': 'black:black'} if total1 else {}
-    total2 = len(relationship.participation) > 1 and relationship.participation[1] == "total"
-    edge_style2 = {'color': 'black:black'} if total2 else {}
-    total3 = len(relationship.participation) > 2 and relationship.participation[2] == "total"
-    edge_style3 = {'color': 'black:black'} if total3 else {}
-    
-    dot.edge(relationship.entity1, relationship.name, label=f' {c1} ', arrowhead='none', fontsize='12', **edge_style1)
-    dot.edge(relationship.entity2, relationship.name, label=f' {c2} ', arrowhead='none', fontsize='12', **edge_style2)
-    if relationship.entity3:
-        dot.edge(relationship.entity3, relationship.name, label=f' {c3} ', arrowhead='none', fontsize='12', **edge_style3)
-
+    for i, entity in enumerate(relationship.entities):
+        card_val = cards[i] if i < len(cards) else ""
+        c_label = card_label(relationship, i, card_val)
+        
+        is_total = i < len(parts) and parts[i] == "total"
+        edge_style = {'color': 'black:black'} if is_total else {}
+        
+        dot.edge(entity.name, relationship.name, label=f' {c_label} ', arrowhead='none', fontsize='12', **edge_style)
      
    
 if __name__ == "__main__":
 
     json = '''
-    {
+  {
   "entities": [
     {
       "name": "Employee",
       "weak": false,
       "attributes": [
         { "name": "SSN", "isPrimaryKey": true },
-        { "name": "Name", "composite": ["FirstName", "LastName"] },
+        { "name": "Name", "composite": [
+          { "name": "FirstName" },
+          { "name": "LastName" }
+        ] },
         { "name": "Phone", "isMultiValued": true },
         { "name": "Age", "isDerived": true }
       ]
@@ -130,8 +133,7 @@ if __name__ == "__main__":
   "relationships": [
     {
       "name": "Works_In",
-      "entity1": "Employee",
-      "entity2": "Department",
+      "entities": [{"name": "Employee"}, {"name": "Department"}],
       "cardinality": ["N", "1"],
       "participation": ["total", "total"],
       "minCardinality": ["", "5"],
@@ -139,20 +141,19 @@ if __name__ == "__main__":
     },
     {
       "name": "Has_Dependents",
-      "entity1": "Employee",
-      "entity2": "Dependent",
+      "entities": [{"name": "Employee"}, {"name": "Dependent"}],
       "cardinality": ["1", "N"],
       "participation": ["partial", "total"],
       "identifyingRelationship": true
     },
     {
       "name": "Assigned_To",
-      "entity1": "Employee",
-      "entity2": "Project",
-      "entity3": "Department",
+      "entities": [{"name": "Employee"}, {"name": "Project"}, {"name": "Department"}],
       "cardinality": ["M", "N", "1"],
       "participation": ["partial", "partial", "partial"],
-      "attributes": ["Hours"]
+      "attributes": [
+        { "name": "Hours" }
+      ]
     }
   ]
 }
