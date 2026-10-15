@@ -24,6 +24,7 @@ def generate_erd_json_from_text(system_description):
         - In a relationship, entity1/entity2/entity3, the cardinality list, and the participation list must all follow the same order.
         - cardinality has one value per entity: "1", "N" or "M" (e.g. ["N","1"] or ["M","N","1"]).
         - participation has one value per entity: "total" if every instance must participate, otherwise "partial".
+        - roles (optional): has one value per entity representing its role in the relationship (e.g. ["Worker", "Employer"]). If no specific roles are mentioned, leave the list empty.
         - A weak entity always has total participation in its identifying relationship.
         - minCardinality/maxCardinality are per entity, in the same order as entity1/2/3.
         Fill an entity's slot ONLY if the description gives explicit numeric bounds for that specific entity (e.g. "between 5 and 50 employees").
@@ -67,7 +68,7 @@ if __name__ == "__main__":
         A Project has a unique ProjectID and a Location.
 
         Relationships:
-        - Works_In: every employee works in exactly one department. Every department must have between 5 and 50 employees.
+        - Works_In: every employee works in exactly one department. Every department must have between 5 and 50 employees. In this relationship, the Employee takes the role of 'Worker' and the Department takes the role of 'Employer'.
         - Has_Dependents: an employee can have many dependents, or none. Every dependent must belong to an employee. This is the identifying relationship of the weak entity Dependent.
         - Assigned_To: a ternary relationship between Employee, Project and Department. An employee can work on many projects, and a project can have many employees. For a given employee and project, there is exactly one department. All participations are partial. We track the 'Hours' worked for each assignment.
         """
