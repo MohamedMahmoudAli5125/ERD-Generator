@@ -1,0 +1,10 @@
+        We need to design a database system for a company.
+        An Employee has a unique SSN, a composite Name (consisting of a FirstName and LastName), one or more Phone numbers, and a derived Age.
+        A Department has a unique DeptID and a DeptName.
+        A Dependent is a weak entity, identified by a partial key Dep_Name, and also has a Relation to the employee.
+        A Project has a unique ProjectID and a Location.
+
+        Relationships:
+        - Works_In: every employee works in exactly one department. Every department must have between 5 and 50 employees. In this relationship, the Employee takes the role of 'Worker' and the Department takes the role of 'Employer'.
+        - Has_Dependents: an employee can have many dependents, or none. Every dependent must belong to an employee. This is the identifying relationship of the weak entity Dependent.
+        - Assigned_To: a ternary relationship between Employee, Project and Department. An employee can work on many projects, and a project can have many employees. For a given employee and project, there is exactly one department. All participations are partial. We track the 'Hours' worked for each assignment.
