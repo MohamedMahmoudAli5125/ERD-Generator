@@ -98,34 +98,26 @@ System Description:
 
 The rendering engine (`diagram_renderer.py`) dynamically maps the Pydantic schema components into Graphviz shapes following standard Database System notations:
 
-### 1. Layout Engines
-- **Hierarchical Layout (LR):** Standard directed flow (left-to-right) using the `dot` engine, ideal for clean, readable pipelines.
-- **Star / Radial Layout:** Spring-model layout using the `neato` engine (`overlap='false'`), spreading complex relationships and entities radially from the center.
+| Category | Component | Graphviz Rendering & Styling |
+| :--- | :--- | :--- |
+| **Layout Engines** | **Hierarchical (LR)** | Standard directed flow (left-to-right) using the `dot` engine, ideal for clean, readable pipelines. |
+| | **Star / Radial** | Spring-model layout using the `neato` engine (`overlap='false'`), spreading radially from the center. |
+| **Entities** | **Regular Entity** | Standard **Rectangle** (`shape='rectangle'`). |
+| | **Weak Entity** | **Double Rectangle** (`peripheries='2'`). |
+| **Relationships** | **Regular Relationship** | Standard **Diamond** (`shape='diamond'`). |
+| | **Identifying** | **Double Diamond** (`peripheries='2'`). |
+| | **Total Participation** | **Double Line** (`color='black:black'`) connecting entity to relationship. |
+| | **Partial Participation** | Standard single line. |
+| | **Cardinality** | Displayed directly on edges (e.g., `(1)`, `(N)`, `(M..N)`). |
+| | **Entity Roles** | Displayed above the cardinality ratio when specified (e.g., `Worker (N)`). |
+| **Attributes** | **Regular Attribute** | Standard **Ellipse**. |
+| | **Primary Key** | Ellipse with **underlined** text. |
+| | **Partial Key** | Ellipse with a **dotted underline** (using Graphviz HTML-like labels). |
+| | **Multi-Valued** | Ellipse with a **double border** (`peripheries='2'`). |
+| | **Derived** | Ellipse with a **dashed border** (`style='dashed'`). |
+| | **Composite** | A recursive tree of sub-ellipses branching out from the parent attribute. |
 
-### 2. Entities
-- **Regular Entity:** Rendered as a standard **Rectangle** (`shape='rectangle'`).
-- **Weak Entity:** Rendered as a **Double Rectangle** (`peripheries='2'`).
-
-### 3. Relationships
-- **Regular Relationship:** Rendered as a standard **Diamond** (`shape='diamond'`).
-- **Identifying Relationship:** Rendered as a **Double Diamond** (`peripheries='2'`).
-- **Lines & Participation:**
-  - **Total Participation:** Rendered with a **Double Line** (`color='black:black'`).
-  - **Partial Participation:** Standard single line.
-- **Edge Annotations:**
-  - **Cardinality:** Displayed directly on edges (e.g., `(1)`, `(N)`, `(M..N)`).
-  - **Entity Roles:** Displayed above the cardinality ratio when specified (e.g., `Worker (N)`).
-
-### 4. Attributes
-Attributes are rendered as **Ellipses** with styling based on their type:
-- **Regular Attribute:** Standard Ellipse.
-- **Primary Key (`isPrimaryKey`):** Ellipse with **underlined** text.
-- **Partial Key (`isPartialKey`):** Ellipse with a **dotted underline** (using Graphviz HTML-like labels).
-- **Multi-Valued (`isMultiValued`):** Ellipse with a **double border** (`peripheries='2'`).
-- **Derived (`isDerived`):** Ellipse with a **dashed border** (`style='dashed'`).
-- **Composite (`composite`):** A recursive tree of sub-ellipses branching out from the parent attribute.
 ---
-
 ## 🏗️ Pydantic Schema Architecture
 
 The core of the application relies on strict data validation using `Pydantic` (`schemas.py`):
