@@ -89,6 +89,8 @@ if mode == "JSON Input":
         
             except ValidationError:
                 st.error("Failed to parse the JSON. Please check the format.")
+            except Exception as e:
+                st.error(f"Something went wrong while generating the diagram: {e}")
         else:
             st.warning("Please provide JSON input either by pasting or uploading a file.")
 
@@ -117,6 +119,8 @@ elif mode == "Textual Description":
                             st.json(erd_schema.model_dump())
                     except ValidationError:
                         st.error("Failed to parse the AI-generated JSON.")
+                    except Exception as e:
+                        st.error(f"Something went wrong while generating the diagram: {e}")
                 else:
                     st.error("AI Service failed to generate a valid response.")
         else:
@@ -159,6 +163,8 @@ elif mode == "Compare Both":
                     show_preview(preview_manual)
                 except ValidationError:
                     st.error("Failed to parse the manual JSON.")
+                except Exception as e:
+                    st.error(f"Something went wrong while generating the diagram: {e}")
                     
             with res_col2:
                 st.markdown("### AI Generated ERD")
@@ -171,6 +177,8 @@ elif mode == "Compare Both":
                         show_preview(preview_ai)
                     except ValidationError:
                         st.error("Failed to parse the AI-generated JSON.")
+                    except Exception as e:
+                        st.error(f"Something went wrong while generating the diagram: {e}")
                 else:
                     st.error("AI Service failed to generate a valid response.")
         else:

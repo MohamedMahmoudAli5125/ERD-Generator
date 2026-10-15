@@ -1,4 +1,5 @@
 import os
+import html
 
 import graphviz
 from parser import parse_erd_json
@@ -47,9 +48,9 @@ def render_attributes(dot, owner_name, attributes):
         node_id = f"{owner_name}_{attribute.name}"
         
         if attribute.isPrimaryKey:
-            dot.node(node_id, f"<<u>{attribute.name}</u>>", shape='ellipse')   
+            dot.node(node_id, f"<<u>{html.escape(attribute.name)}</u>>", shape='ellipse')   
         elif attribute.isPartialKey:
-            dotted_label = f'<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD BORDER="1" SIDES="B" STYLE="DOTTED">{attribute.name}</TD></TR></TABLE>>'
+            dotted_label = f'<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD BORDER="1" SIDES="B" STYLE="DOTTED">{html.escape(attribute.name)}</TD></TR></TABLE>>'
             dot.node(node_id, dotted_label, shape='ellipse')              
         elif attribute.isMultiValued:
             dot.node(node_id, attribute.name, shape='ellipse', peripheries='2')
@@ -77,10 +78,8 @@ def handle_relationship(dot, relationship):
         dot.node(relationship.name, relationship.name, shape='diamond', style='filled', fillcolor='lightgrey') 
     if relationship.attributes:
       render_attributes(dot, relationship.name, relationship.attributes)
-    if relationship.cardinality:
-      cards = relationship.cardinality
-    if relationship.participation:
-      parts = relationship.participation
+    cards = relationship.cardinality or []
+    parts = relationship.participation or []
    
     roles = relationship.roles if hasattr(relationship, 'roles') else []
     for i, entity in enumerate(relationship.entities):

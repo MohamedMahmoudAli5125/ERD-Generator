@@ -5,7 +5,7 @@ class Attribute(BaseModel):
     name: str
     isPrimaryKey: bool = False
     isMultiValued: bool = False
-    composite: Optional[List[Attribute]] = None
+    composite: Optional[List['Attribute']] = None
     isPartialKey: bool = False
     isDerived: bool = False
     
