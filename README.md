@@ -161,6 +161,6 @@ class Relationship(BaseModel):
 ## 📚 Libraries Used (`requirements.txt`)
 - `pydantic`: For strict data validation and JSON parsing.
 - `graphviz`: For programmatically rendering the ER Diagram.
-- `google-generativeai`: The official Google SDK to communicate with the Gemini AI API.
+- `google-genai`: The official Google GenAI SDK to communicate with the Gemini AI API.
 - `streamlit`: To build the interactive Graphical User Interface (GUI).
 - `python-dotenv`: For managing sensitive API keys via `.env` files.
