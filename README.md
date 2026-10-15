@@ -122,6 +122,7 @@ The rendering engine (`diagram_renderer.py`) dynamically maps the Pydantic schem
 
 The core of the application relies on strict data validation using `Pydantic` (`schemas.py`):
 
+
 ```python
 class Attribute(BaseModel):
     name: str
@@ -147,6 +148,12 @@ class Relationship(BaseModel):
     minCardinality: Optional[List[str]] = None 
     maxCardinality: Optional[List[str]] = None
 ```
+
+*This schema guarantees that both user-supplied and AI-generated JSON strictly adhere to the expected format, preventing rendering errors and supporting flexible N-ary setups.*
+
+> **💡 Good Reference :** [JSON to Pydantic by JSONic](https://jsonic.io/guides/json-to-pydantic).
+
+
 
 
 ---
