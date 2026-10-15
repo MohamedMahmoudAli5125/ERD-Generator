@@ -18,6 +18,7 @@ class Relationship(BaseModel):
     entities: List[Entity] = Field(default_factory=list)  
     cardinality: List[str] = Field(default_factory=list) 
     participation: List[str] = Field(default_factory=list)
+    roles: List[str] = Field(default_factory=list)
     attributes: List[Attribute] = Field(default_factory=list)
     identifyingRelationship: bool = False
     minCardinality: Optional[List[str]] = None # List of minimum cardinalities for each entity in the relationship

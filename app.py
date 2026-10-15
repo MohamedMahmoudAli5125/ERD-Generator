@@ -1,4 +1,5 @@
 import os
+import base64
 from PIL import Image
 import streamlit as st
 from pydantic import ValidationError
@@ -20,6 +21,11 @@ output_format = st.sidebar.selectbox(
     ["png", "pdf", "svg", "jpeg"]
 )
 
+layout_choice = st.sidebar.selectbox(
+    "Choose Diagram Layout:",
+    ["Hierarchical (LR)", "Star (Radial)"]
+)
+
 OUTPUT_BASE_DIR = "output"
 MANUAL_DIR = os.path.join(OUTPUT_BASE_DIR, "manual_json")
 AI_DIR = os.path.join(OUTPUT_BASE_DIR, "ai_generated")
@@ -27,6 +33,26 @@ AI_DIR = os.path.join(OUTPUT_BASE_DIR, "ai_generated")
 def get_unique_filename(prefix):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     return f"{prefix}_{timestamp}"
+
+DISPLAYABLE_FORMATS = ["png", "jpeg", "svg"]
+
+def export_erd(erd_schema, filename, directory):
+    render_graph(erd_schema, filename=filename, directory=directory, file_format=output_format, layout=layout_choice)
+    saved_path = os.path.join(directory, f"{filename}.gv.{output_format}")
+    preview_path = saved_path
+    if output_format not in DISPLAYABLE_FORMATS:
+        render_graph(erd_schema, filename=filename, directory=directory, file_format="png", layout=layout_choice)
+        preview_path = os.path.join(directory, f"{filename}.gv.png")
+        st.info(f"`{output_format}` can't be previewed, so a PNG copy was also saved for preview.")
+    return saved_path, preview_path
+
+def show_preview(preview_path):
+    if preview_path.endswith(".svg"):
+        with open(preview_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        st.markdown(f'<img src="data:image/svg+xml;base64,{b64}" style="max-width:100%">', unsafe_allow_html=True)
+    else:
+        st.image(preview_path)
 
 col1, col2 = st.columns([1, 8])
 with col1:
@@ -53,9 +79,9 @@ if mode == "JSON Input":
             try:
                 erd_schema = parse_erd_json(json_input)
                 filename = get_unique_filename("manual_erd")
-                dot = render_graph(erd_schema, filename=filename, directory=MANUAL_DIR, file_format=output_format)
-                st.success(f"JSON Parsed & Graph saved to `{MANUAL_DIR}/{filename}.{output_format}`")
-                st.graphviz_chart(dot)
+                saved_path, preview_path = export_erd(erd_schema, filename, MANUAL_DIR)
+                st.success(f"JSON Parsed & Graph saved to `{saved_path}`")
+                show_preview(preview_path)
                 
                 st.write("Parsed ERD Schema:")
                 with st.expander("View JSON Data"):
@@ -82,10 +108,10 @@ elif mode == "Textual Description":
                     try:
                         erd_schema = parse_erd_json(generated_json)
                         filename = get_unique_filename("ai_erd")
-                        dot = render_graph(erd_schema, filename=filename, directory=AI_DIR, file_format=output_format)
-                        st.success(f" AI Generated ERD saved to `{AI_DIR}/{filename}.{output_format}`")
+                        saved_path, preview_path = export_erd(erd_schema, filename, AI_DIR)
+                        st.success(f" AI Generated ERD saved to `{saved_path}`")
                         
-                        st.graphviz_chart(dot)
+                        show_preview(preview_path)
                         
                         with st.expander("View Generated JSON Data"):
                             st.json(erd_schema.model_dump())
@@ -128,9 +154,9 @@ elif mode == "Compare Both":
                 try:
                     erd_schema_manual = parse_erd_json(json_input_compare)
                     filename_manual = get_unique_filename("compare_manual")
-                    dot_manual = render_graph(erd_schema_manual , filename=filename_manual, directory=MANUAL_DIR, file_format=output_format)
-                    st.success(f"Saved: `{filename_manual}.{output_format}`")
-                    st.graphviz_chart(dot_manual)
+                    saved_manual, preview_manual = export_erd(erd_schema_manual, filename_manual, MANUAL_DIR)
+                    st.success(f"Saved: `{saved_manual}`")
+                    show_preview(preview_manual)
                 except ValidationError:
                     st.error("Failed to parse the manual JSON.")
                     
@@ -140,9 +166,9 @@ elif mode == "Compare Both":
                     try:
                         erd_schema_ai = parse_erd_json(generated_json_compare)
                         filename_ai = get_unique_filename("compare_ai")
-                        dot_ai = render_graph(erd_schema_ai , filename=filename_ai, directory=AI_DIR, file_format=output_format)
-                        st.success(f"Saved: `{filename_ai}.{output_format}`")
-                        st.graphviz_chart(dot_ai)
+                        saved_ai, preview_ai = export_erd(erd_schema_ai, filename_ai, AI_DIR)
+                        st.success(f"Saved: `{saved_ai}`")
+                        show_preview(preview_ai)
                     except ValidationError:
                         st.error("Failed to parse the AI-generated JSON.")
                 else:

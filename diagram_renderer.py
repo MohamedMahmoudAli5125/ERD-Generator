@@ -3,10 +3,14 @@ import os
 import graphviz
 from parser import parse_erd_json
 
-def render_graph(graph, filename='graph', directory='output', file_format='png'):
+def render_graph(graph, filename='graph', directory='output', file_format='png', layout='Hierarchical (LR)'):
     os.makedirs(directory, exist_ok=True)
-    dot = graphviz.Digraph(filename, comment='Graph', format=file_format)
-    dot.attr(rankdir='LR' , splines='polyline', ranksep='1.8', nodesep='0.4')    
+    if layout == 'Star (Radial)':
+        dot = graphviz.Digraph(filename, comment='Graph', format=file_format, engine='neato')
+        dot.attr(overlap='false', splines='true', sep='+15')
+    else:
+        dot = graphviz.Digraph(filename, comment='Graph', format=file_format)
+        dot.attr(rankdir='LR' , splines='polyline', ranksep='1.8', nodesep='0.4')    
     dot.attr('node', fontname='Times New Roman,', fontsize='12')
     dot.attr('edge', fontname='Times New Roman,', fontsize='11')
     
@@ -71,20 +75,33 @@ def handle_relationship(dot, relationship):
         dot.node(relationship.name, relationship.name, shape='diamond', peripheries='2', style='filled', fillcolor='lightgrey')  
     else:
         dot.node(relationship.name, relationship.name, shape='diamond', style='filled', fillcolor='lightgrey') 
-        
-    render_attributes(dot, relationship.name, relationship.attributes)
-    
-    cards = relationship.cardinality
-    parts = relationship.participation
-    
+    if relationship.attributes:
+      render_attributes(dot, relationship.name, relationship.attributes)
+    if relationship.cardinality:
+      cards = relationship.cardinality
+    if relationship.participation:
+      parts = relationship.participation
+   
+    roles = relationship.roles if hasattr(relationship, 'roles') else []
     for i, entity in enumerate(relationship.entities):
         card_val = cards[i] if i < len(cards) else ""
         c_label = card_label(relationship, i, card_val)
         
+        role_val = roles[i] if i < len(roles) else ""
+        if role_val:
+            edge_label = f' {role_val}\n({c_label}) '
+        else:
+            edge_label = f' {c_label} '
+          
         is_total = i < len(parts) and parts[i] == "total"
         edge_style = {'color': 'black:black'} if is_total else {}
         
-        dot.edge(entity.name, relationship.name, label=f' {c_label} ', arrowhead='none', fontsize='12', **edge_style)
+        dot.edge(entity.name if hasattr(entity, 'name') else entity['name']
+                 , relationship.name
+                 , label=f' {edge_label} '
+                 , arrowhead='none'
+                 , fontsize='12'
+                 , **edge_style)
      
    
 if __name__ == "__main__":
@@ -137,6 +154,7 @@ if __name__ == "__main__":
       "cardinality": ["N", "1"],
       "participation": ["total", "total"],
       "minCardinality": ["", "5"],
+      "roles": ["Worker", "Employer"],
       "maxCardinality": ["", "50"]
     },
     {
